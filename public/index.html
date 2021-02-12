@@ -14,96 +14,27 @@
     display: none;
   }
   #state {
+    display: none;
     color: red;
   }
 </style>
 <body>
-  <h1>Audio Recorder</h1>
+  <h1>Upload Audio</h1>
+  <input type="file" accept="audio/*" capture id="upload">
+  <h1>Recorder Audio</h1>
   <button id="record">Record</button>
   <button id="stop">Stop</button>
-  <button id="send">Send</button>
+  
   <br>
   <h3 id="state"></h3>
   <div class="preview">
     <h3>Preview</h3>
     <audio id="player" controls></audio>
+    <br>
+    <button id="send">Send</button>
   </div>
   
 
-  <script>
-    const record = document.getElementById('record');
-    const stop = document.getElementById('stop');
-    const player = document.getElementById('player');
-    const send = document.getElementById('send');
-    const state = document.getElementById('state');
-    let blobData, audioBlob;
-    const audioChunks = [];
-
-    if (navigator.mediaDevices || navigator.mediaDevices.getUserMedia) {
-      console.log('getUserMedia supported.');
-
-      navigator.mediaDevices.getUserMedia ({ audio: true })
-
-          // Success callback
-          .then(function(stream) {
-            const mediaRecorder = new MediaRecorder(stream)
-            console.log({stream, mediaRecorder, audioChunks})
-
-            record.onclick = () => {
-              console.log({audioChunks})
-              mediaRecorder.start();
-              state.innerHTML = 'Recording...';
-              record.style.background = "red";
-              record.style.color = "black";
-            }
-            
-            stop.onclick = () => {
-              mediaRecorder.stop();
-              console.log("recorder stopped");
-              state.innerHTML = '';
-              record.style.background = "";
-              record.style.color = "";
-            }
-            
-            mediaRecorder.ondataavailable = function(e) {
-              audioChunks.push(e.data)
-              player.src = URL.createObjectURL(e.data);
-              document.querySelector('.preview').style.display = 'inline-block';
-            }
-
-          })
-
-
-          // Error callback
-          .catch(function(err) {
-            console.log('The following getUserMedia error occurred: ' + err);
-          }
-      );
-    } else {
-      alert('getUserMedia not supported on your browser!');
-    }
-
-    send.onclick = function(e, audio) {
-        const audioBlob = new Blob(audioChunks, {type: 'audio/mp3'});
-        console.log(audioBlob);
-
-        var fd = new FormData();
-        fd.append('soundBlob', audioBlob, URL.createObjectURL(audioBlob));
-
-        fetch('/upload',
-          {
-            method: 'post',
-            body: fd
-          })
-        .then(function(response) {
-          console.log(response);
-          return response;
-        })
-        .catch(function(err){ 
-          console.log(err);
-        });
-
-      }
-  </script>
+  <script src="index.js"></script>
 </body>
 </html>
